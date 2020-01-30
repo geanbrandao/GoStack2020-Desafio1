@@ -14,6 +14,25 @@ const p = {
 }
 projects.push(p)
 
+// middleware global
+server.use((req, res, next) => {
+
+  console.count('Número de requisições')
+  
+  return next()
+})
+
+
+// middleware local
+function checkProjectExist(req, res, next) {
+  const project = projects[req.params.id]
+  if (!project) {
+    return res.status(400).json({ message: "Projeto não existe"})
+  }
+
+  return next()
+}
+
 // listar todos os projetos
 server.get('/projects', (req, res) => {
   return res.json({projects})
@@ -33,7 +52,7 @@ server.post('/projects', (req, res) => {
   return res.json({message: "Projeto cadastrado"})
 })
 
-server.put('/projects/:id', (req, res) => {
+server.put('/projects/:id', checkProjectExist, (req, res) => {
   const { id } = req.params
   const { title } = req.body
 
@@ -46,7 +65,7 @@ server.put('/projects/:id', (req, res) => {
 
 })
 
-server.delete('/projects/:id', (req, res) => {
+server.delete('/projects/:id', checkProjectExist, (req, res) => {
   const { id } = req.params
 
   const index = projects.findIndex(p => p.id == id)
@@ -57,7 +76,7 @@ server.delete('/projects/:id', (req, res) => {
 
 })
 
-server.post('/projects/:id/tasks', (req, res) => {
+server.post('/projects/:id/tasks', checkProjectExist, (req, res) => {
   const { id } = req.params
   const { title} = req.body
 
